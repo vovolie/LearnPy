@@ -291,3 +291,35 @@ def transaction():
 
     return _TransactionCtx()
 
+def with_transaction(func):
+    '''
+    A decorator that makes function around transaction.
+
+    >>> @with_transaction
+    ...     def update_profile(id, name, rollback):
+    ...         u = dict(id=id, name=name, email='%s@test.org' % name, passwd=name, last_modified=time.time())
+    ...         insert('user', **u)
+    ...         r = update('update user set passwd=? where id=?', name.upper(), id)
+    ...         if roolback:
+    ...             raise StandardError('will cause rollback...')
+    >>> update_profile(8080, 'Julia', False)
+    >>> select_one('select * from user where id=?', 8080).passwd
+    u'JULIA'
+    >>> update_profile(9090, 'Robert', True)
+    Traceback (most recent call last):
+      ...
+    StandardError: will cause rollback...
+    >>> select('select * from user where id=?', 9090)
+    []
+    '''
+
+    @functools.wraps(func):
+    def _wrapper(*args, **kw):
+        _start = time.time()
+        with _TransactionCtx():
+            return func(*args, **kw)
+        _profiling(_start)
+    return _wrapper
+
+
+def _select(sql, first, *args):

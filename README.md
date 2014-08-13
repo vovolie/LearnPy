@@ -1,4 +1,3 @@
-awesome-python-webapp
-=====================
-
-A python webapp tutorial.
+Learn Python
+==================
+a webapp.

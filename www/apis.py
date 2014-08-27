@@ -10,7 +10,7 @@ import re, json, logging, functools
 from transwarp.web import ctx
 
 def dumps(obj):
-    return json.dump(obj)
+    return json.dumps(obj)
 
 class APIError(StandardError):
     '''
@@ -53,7 +53,6 @@ def api(func):
     def api_test():
         return dict(result='123', items=[])
     '''
-
     @functools.wraps(func)
     def _wrapper(*args, **kw):
         try:
@@ -64,7 +63,7 @@ def api(func):
             logging.exception(e)
             r = json.dumps(dict(error='internalerror', data=e.__class__.__name__, message=e.message))
         ctx.response.content_type = 'application/json'
-        return  r
+        return r
     return _wrapper
 
 if __name__ == '__main__':
